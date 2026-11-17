@@ -1,189 +1,474 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // --- 1. Логика для редактируемого блока "Смысл сюжета" ---
-    const editableText = document.getElementById('editable-meaning');
-    const editBtn = document.getElementById('edit-btn');
-    const saveBtn = document.getElementById('save-btn');
+// ==========================================
+// 1. ИНТЕРАКТИВНЫЙ ДОЖДЬ НА CANVAS + ПЕРЕКЛЮЧАТЕЛЬ
+// ==========================================
+const canvas = document.getElementById('rain-canvas');
+const ctx = canvas.getContext('2d');
+let width, height;
+let drops = [];
+const mouse = { x: -1000, y: -1000 };
 
-    const savedMeaning = localStorage.getItem('customMeaning');
-    if (savedMeaning) {
-        editableText.textContent = savedMeaning;
-    }
 
-    editBtn.addEventListener('click', () => {
-        editableText.setAttribute('contenteditable', 'true');
-        editableText.focus();
-        editBtn.style.display = 'none';
-        saveBtn.style.display = 'inline-block';
-    });
+// Состояние дождя (читаем из localStorage, по умолчанию true)
+let isRainEnabled = localStorage.getItem('rainEnabled') !== 'false';
+const rainToggleBtn = document.getElementById('rain-toggle');
 
-    saveBtn.addEventListener('click', () => {
-        editableText.setAttribute('contenteditable', 'false');
-        editBtn.style.display = 'inline-block';
-        saveBtn.style.display = 'none';
-        localStorage.setItem('customMeaning', editableText.textContent);
-        
-        saveBtn.textContent = 'Сохранено!';
-        setTimeout(() => { saveBtn.textContent = 'Сохранить'; }, 2000);
-    });
 
-    // --- 2. ЛОГИКА ПЕРЕХОДА ПАЛИТРЫ ---
-    const bgGradient = document.querySelector('.bg-gradient');
-    const triggerElement = document.getElementById('palette-trigger');
-    
-    function lerpColor(hex1, hex2, t) {
-        const c1 = hexToRgb(hex1);
-        const c2 = hexToRgb(hex2);
-        const r = Math.round(c1.r + (c2.r - c1.r) * t);
-        const g = Math.round(c1.g + (c2.g - c1.g) * t);
-        const b = Math.round(c1.b + (c2.b - c1.b) * t);
-        return `rgb(${r}, ${g}, ${b})`;
-    }
+function resizeCanvas() {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
 
-    function hexToRgb(hex) {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? {
-            r: parseInt(result[1], 16),
-            g: parseInt(result[2], 16),
-            b: parseInt(result[3], 16)
-        } : { r: 0, g: 0, b: 0 };
-    }
 
-    const topC1 = '#fa855a';
-    const topC2 = '#ffe4b9';
-    const topC3 = '#62c4da';
-    const botC1 = '#0d2e92';
-    const botC2 = '#4abbb0';
-    const botC3 = '#0d2e92';
+window.addEventListener('mousemove', (e) => {
+  mouse.x = e.clientX;
+  mouse.y = e.clientY;
+});
 
-    function updateColors() {
-        if (!triggerElement) return;
-        const triggerRect = triggerElement.getBoundingClientRect();
-        const windowHeight = window.innerHeight;
-        
-        const startPoint = windowHeight * 0.9;
-        const endPoint = windowHeight * 0.3;
-        
-        let progress = (startPoint - triggerRect.top) / (startPoint - endPoint);
-        
-        if (progress > 1) progress = 1;
-        if (progress < 0) progress = 0;
 
-        const currentC1 = lerpColor(topC1, botC1, progress);
-        const currentC2 = lerpColor(topC2, botC2, progress);
-        const currentC3 = lerpColor(topC3, botC3, progress);
+class RainDrop {
+  constructor() {
+      this.reset();
+  }
+ 
+  reset() {
+      this.x = Math.random() * width;
+      this.y = Math.random() * -height;
+      this.speed = Math.random() * 8 + 6;
+      this.length = Math.random() * 25 + 15;
+      this.opacity = Math.random() * 0.5 + 0.4;
+      this.wind = 0;
+  }
+ 
+  update() {
+      this.y += this.speed;
+      this.x += this.wind;
+     
+      const dx = this.x - mouse.x;
+      const dy = this.y - mouse.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      const interactionRadius = 150;
+     
+      if (distance < interactionRadius) {
+          const force = (interactionRadius - distance) / interactionRadius;
+          this.x += (dx / distance) * force * 4;
+          this.y += (dy / distance) * force * 1.5;
+          this.opacity = Math.min(this.opacity + 0.4, 1.0);
+      } else {
+          this.opacity = Math.max(this.opacity - 0.02, 0.4);
+      }
+     
+      if (this.y > height) {
+          this.reset();
+      }
+  }
+ 
+  draw() {
+      ctx.beginPath();
+      ctx.strokeStyle = `rgba(208, 254, 255, ${this.opacity})`;
+      ctx.lineWidth = 2;
+      ctx.moveTo(this.x, this.y);
+      ctx.lineTo(this.x + this.wind, this.y + this.length);
+      ctx.stroke();
+  }
+}
 
-        bgGradient.style.background = `linear-gradient(135deg, ${currentC1} 0%, ${currentC2} 50%, ${currentC3} 100%)`;
 
-        const root = document.documentElement;
-        
-        const textColor = progress > 0.5 ? '#ffffff' : '#2c1e16';
-        root.style.setProperty('--current-text', textColor);
-        
-        const accentColor = lerpColor('#c93638', '#ffe4b9', progress);
-        root.style.setProperty('--current-accent', accentColor);
+const dropCount = Math.min(window.innerWidth / 3, 300);
+for (let i = 0; i < dropCount; i++) {
+  drops.push(new RainDrop());
+}
 
-        if (progress > 0.3) {
-            const glassOpacity = 0.45 - (progress * 0.2);
-            root.style.setProperty('--current-glass', `rgba(13, 46, 146, ${glassOpacity})`);
-            root.style.setProperty('--current-glass-border', `rgba(255, 255, 255, ${0.6 - progress * 0.4})`);
-        } else {
-            root.style.setProperty('--current-glass', `rgba(255, 255, 255, 0.45)`);
-            root.style.setProperty('--current-glass-border', `rgba(255, 255, 255, 0.6)`);
-        }
-    }
 
-    window.addEventListener('scroll', updateColors);
-    window.addEventListener('resize', updateColors);
-    updateColors();
+// Иконки для кнопки
+const icons = {
+  on: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.832a4.5 4.5 0 0 0-8.336 0H7a4.5 4.5 0 0 0 0 9h13z"/><path d="M8 19v2"/><path d="M12 19v2"/><path d="M16 19v2"/></svg>`,
+  off: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16.2A4.5 4.5 0 0 0 17.5 8h-1.832a4.5 4.5 0 0 0-8.336 0H7a4.5 4.5 0 0 0 0 9h13z"/><line x1="4" y1="4" x2="20" y2="20"/></svg>`
+};
 
-    // --- 3. Анимация появления секций (Подъем из пыли) ---
-    const sections = document.querySelectorAll('.section');
-    
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.15 });
 
-    sections.forEach(section => {
-        observer.observe(section);
-    });
+function updateRainToggleUI() {
+  if (isRainEnabled) {
+      rainToggleBtn.classList.remove('disabled');
+      rainToggleBtn.innerHTML = icons.on;
+      rainToggleBtn.setAttribute('aria-label', 'Выключить дождь');
+  } else {
+      rainToggleBtn.classList.add('disabled');
+      rainToggleBtn.innerHTML = icons.off;
+      rainToggleBtn.setAttribute('aria-label', 'Включить дождь');
+  }
+}
 
-    // --- 4. Логика модального окна (Zoom) ---
-    const modal = document.getElementById("image-modal");
-    const modalImg = document.getElementById("zoomed-image");
-    const closeBtn = document.querySelector(".close-modal");
-    const zoomableImages = document.querySelectorAll(".zoomable-img");
 
-    zoomableImages.forEach(img => {
-        img.addEventListener("click", function() {
-            modalImg.src = this.src;
-            modal.classList.add("show");
-            document.body.style.overflow = "hidden";
-        });
-    });
+// Обработчик клика по кнопке
+rainToggleBtn.addEventListener('click', () => {
+  isRainEnabled = !isRainEnabled;
+  localStorage.setItem('rainEnabled', isRainEnabled);
+  updateRainToggleUI();
+});
 
-    function closeModal() {
-        modal.classList.remove("show");
-        document.body.style.overflow = "auto";
-        setTimeout(() => { modalImg.src = ""; }, 300);
-    }
 
-    if (closeBtn) closeBtn.addEventListener("click", closeModal);
-    if (modal) {
-        modal.addEventListener("click", function(event) {
-            if (event.target === modal) closeModal();
-        });
-    }
-    document.addEventListener("keydown", function(event) {
-        if (event.key === "Escape" && modal.classList.contains("show")) closeModal();
-    });
+function animateRain() {
+  if (isRainEnabled) {
+      ctx.clearRect(0, 0, width, height);
+      drops.forEach(drop => {
+          drop.update();
+          drop.draw();
+      });
+  } else {
+      // Мгновенная очистка холста при выключенном дожде для экономии ресурсов
+      ctx.clearRect(0, 0, width, height);
+  }
+  requestAnimationFrame(animateRain);
+}
 
-    // --- 5. НОВОЕ: Фоновый вихрь (Пыльная буря) ---
-    const swirl = document.createElement('div');
-    swirl.classList.add('bg-swirl');
-    document.body.appendChild(swirl);
 
-    // --- 6. НОВОЕ: Пыльный след за курсором (Dust Trail) ---
-    let lastDustTime = 0;
-    
-    document.addEventListener('mousemove', (e) => {
-        const now = Date.now();
-        // Создаем пылинку не чаще, чем раз в 50 мс, чтобы не перегружать браузер
-        if (now - lastDustTime > 50) {
-            createDustParticle(e.clientX, e.clientY);
-            lastDustTime = now;
-        }
-    });
+// Инициализация UI и запуск анимации
+updateRainToggleUI();
+animateRain();
 
-    function createDustParticle(x, y) {
-        const dust = document.createElement('div');
-        dust.classList.add('dust-particle');
-        
-        // Случайный размер
-        const size = Math.random() * 6 + 3;
-        dust.style.width = `${size}px`;
-        dust.style.height = `${size}px`;
-        
-        // Позиция
-        dust.style.left = `${x}px`;
-        dust.style.top = `${y}px`;
-        
-        document.body.appendChild(dust);
-        
-        // Удаляем элемент после завершения анимации
-        setTimeout(() => {
-            dust.remove();
-        }, 800);
-    }
 
-    // --- 7. НОВОЕ: Добавление класса fall-card для эффекта падения ---
-    // Находим все карточки и добавляем им класс для клика
-    const interactiveCards = document.querySelectorAll('.info-card, .story-step, .awards-list li');
-    interactiveCards.forEach(card => {
-        card.classList.add('fall-card');
-    });
+
+
+// ==========================================
+// 2. АНИМАЦИЯ ПОЯВЛЕНИЯ ПРИ СКРОЛЛЕ
+// ==========================================
+const observerOptions = {
+  threshold: 0.1,
+  rootMargin: '0px 0px -50px 0px'
+};
+
+
+const scrollObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+      if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+      }
+  });
+}, observerOptions);
+
+
+document.querySelectorAll('.reveal').forEach(el => {
+  scrollObserver.observe(el);
+});
+
+
+
+
+// ==========================================
+// 3. 3D-НАКЛОН КАРТОЧЕК (TILT EFFECT)
+// ==========================================
+document.querySelectorAll('.tilt-card').forEach(card => {
+  card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+     
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+     
+      const rotateX = ((y - centerY) / centerY) * -6;
+      const rotateY = ((x - centerX) / centerX) * 6;
+     
+      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px) scale(1.01)`;
+  });
+ 
+  card.addEventListener('mouseleave', () => {
+      card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(0) scale(1)';
+  });
+});
+
+
+
+
+// ==========================================
+// 4. ЭФФЕКТ РЯБИ НА КНОПКАХ (RIPPLE)
+// ==========================================
+document.querySelectorAll('.ripple-btn').forEach(button => {
+  button.addEventListener('click', function(e) {
+      const rect = this.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+     
+      const ripple = document.createElement('span');
+      ripple.classList.add('ripple');
+      ripple.style.left = `${x}px`;
+      ripple.style.top = `${y}px`;
+     
+      this.appendChild(ripple);
+     
+      setTimeout(() => {
+          ripple.remove();
+      }, 600);
+  });
+});
+
+
+
+
+// ==========================================
+// 5. ОСНОВНОЙ ФУНКЦИОНАЛ (ТЕКСТ, КАРУСЕЛЬ, ЛАЙТБОКС)
+// ==========================================
+const STORAGE_KEY = 'earth_attraction_meaning';
+const DEFAULT_TEXT = `Серия о том, как мы сами ограничиваем себя выдуманными правилами и не даём себе развиваться дальше. Основная мораль серии в том, что мы должны двигаться вперёд несмотря на препятствия на своём пути.`;
+
+
+const editableText = document.getElementById('meaning');
+const resetBtn = document.getElementById('resetBtn');
+const clearBtn = document.getElementById('clearBtn');
+
+
+function loadText() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  editableText.textContent = saved !== null ? saved : DEFAULT_TEXT;
+}
+
+
+function saveText() {
+  const currentText = editableText.textContent.trim();
+  localStorage.setItem(STORAGE_KEY, currentText);
+  showNotification('💾 Изменения сохранены');
+}
+
+
+function resetText() {
+  if (confirm('Вернуть текст к исходному варианту?')) {
+      editableText.textContent = DEFAULT_TEXT;
+      localStorage.setItem(STORAGE_KEY, DEFAULT_TEXT);
+      showNotification('🔄 Текст восстановлен');
+  }
+}
+
+
+function clearText() {
+  if (confirm('Очистить весь текст?')) {
+      editableText.textContent = '';
+      localStorage.setItem(STORAGE_KEY, '');
+      showNotification('🗑️ Текст очищен');
+  }
+}
+
+
+function showNotification(message) {
+  const existing = document.querySelector('.notification');
+  if (existing) existing.remove();
+ 
+  const notification = document.createElement('div');
+  notification.className = 'notification';
+  notification.textContent = message;
+  notification.style.cssText = `
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: linear-gradient(135deg, var(--card-2), var(--card-3));
+      color: var(--text-dark);
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      z-index: 10001;
+      animation: slideIn 0.3s ease forwards;
+  `;
+  document.body.appendChild(notification);
+ 
+  setTimeout(() => {
+      notification.style.animation = 'slideOut 0.3s ease forwards';
+      setTimeout(() => notification.remove(), 300);
+  }, 2000);
+}
+
+
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+  }
+`;
+document.head.appendChild(style);
+
+
+editableText.addEventListener('input', saveText);
+resetBtn.addEventListener('click', resetText);
+clearBtn.addEventListener('click', clearText);
+
+
+editableText.addEventListener('paste', (e) => {
+  e.preventDefault();
+  const text = e.clipboardData.getData('text/plain');
+  document.execCommand('insertText', false, text);
+});
+
+
+loadText();
+
+
+const heroTitle = document.querySelector('.hero__title');
+heroTitle.addEventListener('mousemove', (e) => {
+  const rect = heroTitle.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  heroTitle.style.textShadow = `
+      ${-(x - rect.width/2) * 0.05}px ${-(y - rect.height/2) * 0.05}px 25px rgba(83, 242, 184, 0.6)
+  `;
+});
+
+
+heroTitle.addEventListener('mouseleave', () => {
+  heroTitle.style.textShadow = 'none';
+});
+
+
+
+
+/* =========================================================
+ КАРУСЕЛЬ ФОТО
+ ========================================================= */
+const carouselTrack = document.querySelector('.carousel__track');
+const carouselSlides = document.querySelectorAll('.carousel__slide');
+const carouselIndicators = document.querySelectorAll('.carousel__indicator');
+const prevArrow = document.querySelector('.carousel__arrow--left');
+const nextArrow = document.querySelector('.carousel__arrow--right');
+
+
+let currentSlide = 0;
+
+
+function goToSlide(index) {
+  carouselSlides[currentSlide].classList.remove('active');
+  carouselIndicators[currentSlide].classList.remove('active');
+  currentSlide = index;
+  carouselSlides[currentSlide].classList.add('active');
+  carouselIndicators[currentSlide].classList.add('active');
+}
+
+
+function nextSlide() {
+  const next = (currentSlide + 1) % carouselSlides.length;
+  goToSlide(next);
+}
+
+
+function prevSlide() {
+  const prev = (currentSlide - 1 + carouselSlides.length) % carouselSlides.length;
+  goToSlide(prev);
+}
+
+
+nextArrow.addEventListener('click', nextSlide);
+prevArrow.addEventListener('click', prevSlide);
+
+
+carouselIndicators.forEach((indicator, index) => {
+  indicator.addEventListener('click', () => goToSlide(index));
+});
+
+
+let autoPlayInterval = setInterval(nextSlide, 5000);
+
+
+carouselTrack.addEventListener('mouseenter', () => clearInterval(autoPlayInterval));
+carouselTrack.addEventListener('mouseleave', () => {
+  autoPlayInterval = setInterval(nextSlide, 5000);
+});
+
+
+
+
+/* =========================================================
+ ЛАЙТБОКС ДЛЯ ПРОСМОТРА ФОТО
+ ========================================================= */
+const lightbox = document.getElementById('photo-lightbox');
+const lightboxImg = document.getElementById('lightbox-img');
+const closeBtn = document.querySelector('.lightbox__close');
+const lightboxPrevArrow = document.querySelector('.lightbox__arrow--left');
+const lightboxNextArrow = document.querySelector('.lightbox__arrow--right');
+
+
+let lightboxScale = 1;
+
+
+carouselSlides.forEach((slide, index) => {
+  const img = slide.querySelector('img');
+  img.addEventListener('click', () => openLightbox(index));
+});
+
+
+function openLightbox(index) {
+  const img = carouselSlides[index].querySelector('img');
+  lightboxImg.src = img.src;
+  lightboxImg.alt = img.alt;
+  lightboxScale = 1;
+  lightboxImg.style.transform = 'scale(1)';
+  lightbox.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+
+function closeLightbox() {
+  lightbox.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+
+function nextLightboxImage() {
+  const next = (currentSlide + 1) % carouselSlides.length;
+  goToSlide(next);
+  const img = carouselSlides[next].querySelector('img');
+  lightboxImg.src = img.src;
+  lightboxImg.alt = img.alt;
+  lightboxScale = 1;
+  lightboxImg.style.transform = 'scale(1)';
+}
+
+
+function prevLightboxImage() {
+  const prev = (currentSlide - 1 + carouselSlides.length) % carouselSlides.length;
+  goToSlide(prev);
+  const img = carouselSlides[prev].querySelector('img');
+  lightboxImg.src = img.src;
+  lightboxImg.alt = img.alt;
+  lightboxScale = 1;
+  lightboxImg.style.transform = 'scale(1)';
+}
+
+
+closeBtn.addEventListener('click', closeLightbox);
+lightboxNextArrow.addEventListener('click', (e) => { e.stopPropagation(); nextLightboxImage(); });
+lightboxPrevArrow.addEventListener('click', (e) => { e.stopPropagation(); prevLightboxImage(); });
+
+
+lightbox.addEventListener('click', (e) => {
+  if (e.target === lightbox || e.target.classList.contains('lightbox__container')) {
+      closeLightbox();
+  }
+});
+
+
+document.addEventListener('keydown', (e) => {
+  if (!lightbox.classList.contains('active')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowRight') nextLightboxImage();
+  if (e.key === 'ArrowLeft') prevLightboxImage();
+});
+
+
+lightbox.addEventListener('wheel', (e) => {
+  if (!lightbox.classList.contains('active')) return;
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? -0.2 : 0.2;
+  lightboxScale = Math.min(Math.max(1, lightboxScale + delta), 4);
+  lightboxImg.style.transform = `scale(${lightboxScale})`;
+}, { passive: false });
+
+
+lightbox.addEventListener('transitionend', (e) => {
+  if (!lightbox.classList.contains('active')) {
+      lightboxScale = 1;
+  }
 });
