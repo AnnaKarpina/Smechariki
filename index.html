@@ -1,146 +1,176 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-   <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Смешарики — Притяжение земли</title>
-   <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bilby — Анимационный шедевр</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
-   <!-- Интерактивный фон с дождём -->
-   <canvas id="rain-canvas"></canvas>
-   
-   <!-- Кнопка переключения дождя -->
-   <button id="rain-toggle" class="rain-toggle-btn ripple-btn" aria-label="Переключить дождь">
-   </button>
-   
-   <div class="bg-pattern"></div>
 
-   <header class="hero reveal">
-       <h1 class="hero__title">Притяжение земли</h1>
-       <p class="hero__subtitle">Серия из мультсериала «Смешарики. Новые приключения»</p>
-   </header>
+    <!-- Фиксированный фон с градиентом -->
+    <div class="bg-gradient"></div>
 
-   <main class="content">
-       <section class="card reveal tilt-card">
-           <h2 class="card__title">🎭 Персонажи</h2>
-           <ul class="characters">
-               <li><span class="char-name">Копатыч</span> — добродушный, хозяйственный и консервативный медведь-огородник.</li>
-               <li><span class="char-name">Карыч</span> — артист, фантазёр и авантюрист, который любит быть в центре внимания.</li>
-           </ul>
-       </section>
+    <header class="hero">
+        <div class="hero-content">
+            <!-- Блок с постером и текстом -->
+            <div class="hero-layout">
+                <div class="hero-poster">
+                    <!-- Здесь ссылка на постер. Замените URL на локальный, если скачаете картинку -->
+                    <img src="https://raw.githubusercontent.com/AnnaKarpina/Bilby/main/poster.png" alt="Постер мультфильма Bilby">
+                </div>
+                <div class="hero-text">
+                    <h1 class="hero-title">Bilby</h1>
+                    <p class="hero-subtitle">История о неожиданной дружбе в суровых условиях Австралии</p>
+                    <div class="scroll-indicator">
+                        <span>Листайте вниз</span>
+                        <div class="arrow"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
 
-       <section class="card reveal tilt-card">
-           <h2 class="card__title">🎬 Сюжет</h2>
-           <p>
-               Кар-Карыч удивляется, как у Копатыча получается поднимать такие тяжёлые гири, в то время как сам ворон не может справиться даже с лёгкими гантелями. Копатыч объясняет, что в тяжёлой атлетике к поднятию веса подходят постепенно, с каждой тренировкой увеличивая нагрузку и вес снаряда. Поэтому и Карычу нужно тренироваться каждый день, а когда мышцы привыкнут к весу — повышать его. Но однажды наступает «плато», когда больший вес уже не поднять. У Копатыча такое «плато» наступило два года назад, и он уже два года не может поднять штангу. Карычу тоже кажется, что у него наступило «плато», но медведь отвечает, что до плато ему ещё далеко и нужно продолжать тренироваться.
-           </p>
-           <p>
-               Друзья тренируются вместе каждый день, и постепенно Кар-Карыч поднимает всё более тяжёлые веса и приближается по силе к Копатычу. Когда новый вес вызывает у Карыча большие трудности, Копатыч, желая продемонстрировать другу правильный подход, берёт штангу и поднимает её. Ворон обращает внимание, что это тот самый вес, который Копатыч не мог поднять два года.
-           </p>
-       </section>
+    <main>
+        <!-- Секция: О мультфильме -->
+        <section class="section container">
+            <h2 class="section-title">О мультфильме</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <span class="label">Год</span>
+                    <span class="value">2018</span>
+                </div>
+                <div class="info-card">
+                    <span class="label">Студия</span>
+                    <span class="value">DreamWorks</span>
+                </div>
+                <div class="info-card">
+                    <span class="label">Режиссёры</span>
+                    <span class="value">П. Перифель, Дж. Санс, Л. Топаз</span>
+                </div>
+                <div class="info-card">
+                    <span class="label">Длительность</span>
+                    <span class="value">8 минут</span>
+                </div>
+            </div>
+            <div class="content-box glass">
+                <p class="description">
+                    «Bilby» — это короткометражный анимационный фильм, рассказывающий о сумчатом барсуке (билби) по имени Перри. 
+                    Жизнь в австралийской пустыне полна опасностей, и Перри, привыкший выживать в одиночку, 
+                    неожиданно берёт на себя заботу о беззащитном птенце альбатроса. 
+                    Не имея диалогов, фильм передаёт всю гамму эмоций через анимацию и музыку.
+                </p>
+            </div>
+        </section>
 
-       <!-- ИНТЕРАКТИВНЫЙ БЛОК -->
-       <section class="card card--interactive reveal tilt-card">
-           <h2 class="card__title">💭 Смысл серии</h2>
-           <p class="hint">
-               ✏️ Этот блок можно редактировать! Просто кликните по тексту ниже
-               и напишите своё понимание смысла серии. Ваши изменения
-               сохранятся автоматически.
-           </p>
-           <div
-               class="editable-text"
-               id="meaning"
-               contenteditable="true"
-               spellcheck="true"
-           ></div>
-           <div class="actions">
-               <button class="btn ripple-btn" id="resetBtn">🔄 Сбросить текст</button>
-               <button class="btn btn--secondary ripple-btn" id="clearBtn">🗑️ Очистить</button>
-           </div>
-       </section>
+        <!-- Секция: Сюжет (Увеличенный блок) -->
+        <section class="section container">
+            <h2 class="section-title">Сюжет</h2>
+            <div class="content-box glass large-story-box">
+                <p class="description large-text">
+                    Перри — билби, живущий в пустыне. Однажды он спасает маленького птенца от хищников и невольно становится его защитником. 
+                    Теперь ему предстоит не только добывать пищу для себя, но и оберегать малыша от змей, ящериц и других опасностей. 
+                    Со временем между ними возникает глубокая привязанность. Это история о том, как забота и ответственность меняют жизнь к лучшему.
+                </p>
+            </div>
+        </section>
 
-       <!-- ВИДЕОПЛЕЕР С СЕРИЕЙ -->
-       <section class="card video-section reveal tilt-card">
-           <h2 class="card__title">🎥 Смотреть серию</h2>
-           <div class="video-wrapper">
-               <video 
-                   id="episode-video"
-                   class="video-player"
-                   controls
-                   preload="metadata"
-                   playsinline
-               >
-                   <source src="https://vk.ru/video-21665793_456242750" type="video/mp4">
-                   Ваш браузер не поддерживает воспроизведение видео.
-               </video>
-           </div>
-           <p class="video-hint">
-               💡 Нажмите на кнопку ▶️, чтобы начать просмотр серии «Притяжение земли»
-           </p>
-       </section>
+        <!-- Секция: Раскадровка -->
+        <section class="section container" id="storyline-section">
+            <h2 class="section-title">Краткий сюжет</h2>
+            <div class="storyline-container">
+                <div class="story-step glass">
+                    <div class="story-img-wrapper">
+                        <!-- Добавлен класс zoomable-img для обработки клика -->
+                        <img src="https://raw.githubusercontent.com/AnnaKarpina/Bilby/main/foto1.png" alt="Встреча" class="zoomable-img">
+                    </div>
+                    <div class="story-content">
+                        <h3>1. Встреча</h3>
+                        <p>Перри находит беспомощного птенца, выпавшего из гнезда.</p>
+                    </div>
+                </div>
+                <div class="story-step glass">
+                    <div class="story-img-wrapper">
+                        <img src="https://raw.githubusercontent.com/AnnaKarpina/Bilby/main/foto2.png" alt="Опасности пустыни" class="zoomable-img">
+                    </div>
+                    <div class="story-content">
+                        <h3>2. Опасности пустыни</h3>
+                        <p>Билби защищает малыша от змей и хищников.</p>
+                    </div>
+                </div>
+                <div class="story-step glass">
+                    <div class="story-img-wrapper">
+                        <img src="https://raw.githubusercontent.com/AnnaKarpina/Bilby/main/foto3.png" alt="Обучение" class="zoomable-img">
+                    </div>
+                    <div class="story-content">
+                        <h3>3. Обучение</h3>
+                        <p>Перри учит птенца летать.</p>
+                    </div>
+                </div>
+                <div class="story-step glass">
+                    <div class="story-img-wrapper">
+                        <img src="https://raw.githubusercontent.com/AnnaKarpina/Bilby/main/foto4.png" alt="Финал" class="zoomable-img">
+                    </div>
+                    <div class="story-content">
+                        <h3>4. Финал</h3>
+                        <p>Птенец вырастает и учится летать, но их дружба остается навсегда.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Модальное окно для просмотра картинок (добавьте перед закрывающим тегом </body> или после <footer>) -->
+        <div id="image-modal" class="modal">
+            <span class="close-modal">&times;</span>
+            <img class="modal-content" id="zoomed-image">
+        </div>
 
-       <!-- ФОТО ИЗ СЕРИИ - КАРУСЕЛЬ -->
-       <section class="card photo-section reveal tilt-card">
-           <h2 class="card__title">📸 Фото из серии</h2>
-           <div class="carousel">
-               <button class="carousel__arrow carousel__arrow--left ripple-btn" aria-label="Предыдущее фото">
-                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                       <path d="M15 18l-6-6 6-6"/>
-                   </svg>
-               </button>
-               <div class="carousel__track">
-                   <div class="carousel__slide active">
-                       <img src="https://raw.githubusercontent.com/AnnaKarpina/Smechariki/main/foto0.png" alt="Кадр из серии 1">
-                   </div>
-                   <div class="carousel__slide">
-                       <img src="https://raw.githubusercontent.com/AnnaKarpina/Smechariki/main/foto1.png" alt="Кадр из серии 2">
-                   </div>
-                   <div class="carousel__slide">
-                       <img src="https://raw.githubusercontent.com/AnnaKarpina/Smechariki/main/foto2.png" alt="Кадр из серии 3">
-                   </div>
-                   <div class="carousel__slide">
-                       <img src="https://raw.githubusercontent.com/AnnaKarpina/Smechariki/main/foto3.png" alt="Кадр из серии 4">
-                   </div>
-               </div>
-               <button class="carousel__arrow carousel__arrow--right ripple-btn" aria-label="Следующее фото">
-                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                       <path d="M9 18l6-6-6-6"/>
-                   </svg>
-               </button>
-           </div>
-           <div class="carousel__indicators">
-               <button class="carousel__indicator active" data-index="0"></button>
-               <button class="carousel__indicator" data-index="1"></button>
-               <button class="carousel__indicator" data-index="2"></button>
-               <button class="carousel__indicator" data-index="3"></button>
-           </div>
-       </section>
-   </main>
+        <!-- МАРКЕР: После этого блока начинается смена палитры -->
+        <div id="palette-trigger" style="height: 1px; width: 100%;"></div>
 
-   <footer class="footer reveal">
-       <p>Сделано с ❤️ для фанатов Смешариков</p>
-   </footer>
+        <!-- Секция: Награды -->
+        <section class="section container">
+            <h2 class="section-title">Награды и номинации</h2>
+            <ul class="awards-list">
+                <li class="glass">🏆 <strong>Номинация на «Оскар»</strong> — Лучший анимационный короткометражный фильм (2019).</li>
+                <li class="glass">🏆 <strong>Приз зрительских симпатий</strong> — Palm Springs International ShortFest.</li>
+                <li class="glass">🏆 <strong>Jury Award</strong> — SIGGRAPH (2018).</li>
+            </ul>
+        </section>
 
-   <!-- ЛАЙТБОКС ДЛЯ ПРОСМОТРА ФОТО -->
-   <div id="photo-lightbox" class="lightbox">
-       <button class="lightbox__close ripple-btn" aria-label="Закрыть">&times;</button>
-       <button class="lightbox__arrow lightbox__arrow--left ripple-btn" aria-label="Предыдущее фото">
-           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-               <path d="M15 18l-6-6 6-6"/>
-           </svg>
-       </button>
-       <button class="lightbox__arrow lightbox__arrow--right ripple-btn" aria-label="Следующее фото">
-           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-               <path d="M9 18l6-6-6-6"/>
-           </svg>
-       </button>
-       <div class="lightbox__container">
-           <img id="lightbox-img" src="" alt="Просмотр фото">
-       </div>
-       <div class="lightbox__hint">← → Клавиши для навигации &bull; Esc: закрыть &bull; Колёсико: масштаб</div>
-   </div>
+        <!-- Секция: Смысл сюжета (Редактируемый) -->
+        <section class="section container">
+            <h2 class="section-title">Смысл сюжета</h2>
+            <div class="content-box glass editable-section">
+                <p class="description" id="editable-meaning">
+                    Мультфильм «Bilby» — это трогательная история о том, как забота о другом меняет нас самих. 
+                    Даже в самых суровых условиях можно найти тепло и смысл, если рядом есть тот, кого нужно защищать.
+                </p>
+                <div class="edit-controls">
+                    <button id="edit-btn" class="btn">Редактировать текст</button>
+                    <button id="save-btn" class="btn" style="display: none;">Сохранить</button>
+                </div>
+            </div>
+        </section>
 
-   <script src="script.js"></script>
+                       <!-- Секция: Просмотр мультфильма -->
+<!-- Секция: Просмотр мультфильма -->
+        <section class="section container" id="watch-section">
+            <h2 class="section-title">Смотреть мультфильм</h2>
+            <div class="content-box glass video-container">
+                <video controls class="local-video">
+                    <source src="https://pomf2.lain.la/f/s8wyijmp.mp4" type="video/mp4">
+            Ваш браузер не поддерживает видео.
+                </video>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>Сайт создан в ознакомительных целях. Bilby © DreamWorks Animation.</p>
+    </footer>
+
+    <script src="script.js"></script>
 </body>
 </html>
